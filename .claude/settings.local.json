@@ -1,0 +1,53 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh repo:*)",
+      "mcp__jina-reader__search_web",
+      "Edit(~/.claude/skills/grill-me/**)",
+      "WebFetch(domain:obsidian.md)",
+      "Bash(nu -c '$nu')",
+      "Bash(npx --yes ansi-to-html)",
+      "Bash(jj config:*)",
+      "Bash(npm run:*)",
+      "mcp__jina-reader__read_url",
+      "Bash(FORCE_COLOR=1 nu -c '\"def hello [] { print \\\\\"hi\\\\\" }\" | nu-highlight')",
+      "Bash(nu -c '$env._NU_INPUT | nu-highlight')",
+      "Bash(nu -c '$env.config.color_config.bool = {|x| if $x { \"green\" } else { \"light_red\" } }; [{active: true}, {active: false}] | table -e -w 2000')",
+      "Bash(nu -c '$env.config.table.width = 2000; [{active: true, name: \"test\"}] | table -e')",
+      "Bash(COLUMNS=2000 FORCE_COLOR=1 nu -c '[{active: true, name: \"test\"}] | table -e')",
+      "Bash(FORCE_COLOR=1 COLUMNS=2000 nu -c 'ls /Users/chris/git/chris/2-un-esprit-sain/obsidian-nushell | to nuon')",
+      "Bash(nu -c '$env.config.color_config | to nuon')",
+      "Bash(nu -c '$env.config.color_config | describe')",
+      "Bash(nu -c '$env.config | select color_config | to nuon')",
+      "Bash(nu -c '$env.config.color_config | items {|k, v| {key: $k, type: \\($v | describe\\)}} | to nuon')",
+      "Bash(nu -c '$env.config.color_config | columns')",
+      "Bash(nu -c '$env.config | get color_config | describe -d')",
+      "Bash(nu -l -c '$env.config.color_config | columns | length')",
+      "Bash(nu -l -c '$env.config.color_config | reject -i header row_index leading_trailing_space_bg search_result | to nuon')",
+      "Bash(FORCE_COLOR=1 COLUMNS=2000 nu -l -c '{a: true, b: false, c: 42} | table -e')",
+      "Bash(nu -l -c '$env.config.color_config.bool')",
+      "Bash(nu --help)",
+      "Bash(nu -l -c '$env.config.hooks.display_output? | describe')",
+      "Bash(nu -l -c '$env.config.hooks.display_output?')",
+      "Bash(nu -l -c '$env.config | select -i datetime_format | to nuon')",
+      "Bash(nu -l -c '$env.config | select -i datetime_format table filesize | to nuon')",
+      "Bash(nu -l -c '$env.config.datetime_format')",
+      "Bash(nu -l -c '$env.config.datetime_format.normal')",
+      "Bash(nu -l -c '$env.config.datetime_format.table')",
+      "Bash(nu -l -c '$nu.config-path')",
+      "Read(//Users/chris/Library/Application Support/nushell/**)",
+      "Bash(nu -l -c '$env.config.datetime_format | to nuon')",
+      "Bash(nu -l -i -c '$env.config.datetime_format | to nuon; exit')",
+      "Bash(nu -l -c '$nu.user-autoload-dirs')",
+      "Read(//Users/chris/.config/nushell/autoload/**)",
+      "Bash(nu -l -c 'source-env \\($nu.default-config-dir | path join config.nu\\); glob \\($nu.user-autoload-dirs | first | path join '\\\\''*.nu'\\\\''\\) | sort | each {|f| source-env $f }; $env.config.datetime_format | to nuon')",
+      "Bash(jj squash:*)",
+      "Bash(awk 'NR>=50 && NR<=56 {printf \"%d: [%d] %s\\\\n\", NR, length\\($0\\), $0}' README.md)",
+      "Bash(git tag:*)",
+      "Bash(git config:*)"
+    ],
+    "additionalDirectories": [
+      "/Users/chris/.claude/skills"
+    ]
+  }
+}
