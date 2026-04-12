@@ -1,0 +1,72 @@
+.view-content:has(.nushell-output) {
+	padding: var(--size-4-4);
+}
+
+.nushell-output {
+	background: var(--code-background);
+	color: var(--code-normal);
+	font-family: var(--font-monospace);
+	font-size: var(--code-size);
+	line-height: var(--line-height-tight);
+	padding: var(--size-4-4);
+	border-radius: var(--radius-s);
+	overflow-x: auto;
+	margin: 0;
+}
+
+.nushell-unavailable {
+	display: block;
+	color: var(--text-warning);
+	font-size: var(--font-smaller);
+	margin-bottom: var(--size-4-2);
+	padding-bottom: var(--size-4-2);
+	border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.nushell-error {
+	background: var(--code-background);
+	color: var(--text-error);
+	font-family: var(--font-monospace);
+	font-size: var(--code-size);
+	padding: var(--size-4-4);
+	border-radius: var(--radius-s);
+}
+
+/* Settings */
+
+.nushell-settings .setting-item-control input[type="text"] {
+	width: 20em;
+	text-align: right;
+}
+
+.nushell-settings .setting-item {
+	justify-content: center;
+}
+
+.nushell-led {
+	display: inline-block;
+	width: 12px;
+	height: 12px;
+	border-radius: 50%;
+}
+
+.nushell-led-on {
+	background: #a6e3a1;
+	box-shadow: 0 0 6px #a6e3a1;
+}
+
+.nushell-led-off {
+	background: #f38ba8;
+	box-shadow: 0 0 6px #f38ba8;
+}
+
+.nushell-settings-footer {
+	text-align: center;
+	margin-top: var(--size-4-8);
+	color: var(--text-muted);
+	font-size: var(--font-smallest);
+}
+
+.nushell-settings-quote {
+	font-style: italic;
+}

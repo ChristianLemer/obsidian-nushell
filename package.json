@@ -1,0 +1,17 @@
+{
+	"name": "obsidian-nushell",
+	"version": "0.1.0",
+	"description": "Nushell integration for Obsidian",
+	"main": "main.js",
+	"scripts": {
+		"dev": "node esbuild.config.mjs",
+		"build": "node esbuild.config.mjs production",
+		"version": "node version-bump.mjs"
+	},
+	"devDependencies": {
+		"@types/node": "^20.0.0",
+		"esbuild": "^0.21.0",
+		"obsidian": "latest",
+		"typescript": "^5.4.0"
+	}
+}

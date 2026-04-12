@@ -1,0 +1,21 @@
+# npm
+node_modules/
+
+# Build artifacts — uploaded to GitHub releases instead
+main.js
+*.map
+
+# Obsidian
+data.json
+
+# OS
+.DS_Store
+
+# IDE
+.vscode/
+*.iml
+.idea/
+
+# Test vault — folder tracked, contents ignored
+Nushell Plugin Playground/*
+!Nushell Plugin Playground/.gitkeep
