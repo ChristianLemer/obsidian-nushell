@@ -8,6 +8,9 @@ main.js
 # Obsidian
 data.json
 
+# Local vault list (machine-specific)
+.vaults.nuon
+
 # OS
 .DS_Store
 

@@ -1,7 +1,7 @@
 {
 	"id": "nushell",
 	"name": "Nushell",
-	"version": "0.1.1",
+	"version": "0.1.2",
 	"minAppVersion": "1.12.0",
 	"description": "Render Nushell data files (.nuon) and syntax-highlight Nushell scripts (.nu) using the local Nushell installation.",
 	"author": "Christian Lemer",

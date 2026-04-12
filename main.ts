@@ -39,6 +39,8 @@ const DEFAULT_SETTINGS: NushellSettings = {
 	falseColor: "light_red",
 };
 
+const TABLE_WIDTH = 9999;
+
 // Reject values containing characters that could enable shell injection
 const SAFE_SETTING = /^[a-zA-Z0-9%_\-\/., :]*$/;
 
@@ -221,7 +223,7 @@ function runNu(
 			getNuStatus().path,
 			["-c", cmd],
 			{
-				env: { ...process.env, FORCE_COLOR: "1", COLUMNS: "2000", ...env },
+				env: { ...process.env, FORCE_COLOR: "1", ...env },
 				maxBuffer: MAX_BUFFER,
 			},
 			(err, stdout, stderr) => {
@@ -240,7 +242,7 @@ async function renderNuon(data: string, settings: NushellSettings): Promise<stri
 	if (!getNuStatus().available) return renderFallback(data);
 	const preamble = buildPreamble(settings);
 	const raw = await runNu(
-		`${preamble}$env._NU_INPUT | from nuon | table -e`,
+		`${preamble}$env._NU_INPUT | from nuon | table -e -w ${TABLE_WIDTH}`,
 		{ _NU_INPUT: data.trim() },
 	);
 	return ansiToHtml(raw);
@@ -515,7 +517,7 @@ class NushellSettingTab extends PluginSettingTab {
 	private addColorSetting(
 		containerEl: HTMLElement,
 		name: string,
-		key: keyof NushellSettings,
+		key: "datetimeColor" | "filesizeColor" | "trueColor" | "falseColor",
 	): void {
 		new Setting(containerEl)
 			.setName(name)
