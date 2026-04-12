@@ -1,6 +1,6 @@
 {
 	"name": "obsidian-nushell",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "Nushell integration for Obsidian",
 	"main": "main.js",
 	"scripts": {
