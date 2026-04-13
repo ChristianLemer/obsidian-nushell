@@ -7,6 +7,8 @@ import {
 } from "obsidian";
 import { execFile, execSync } from "child_process";
 
+declare const BUILD_COMMIT: string;
+
 // Not in Obsidian's public type definitions but used by community plugins
 // for proper cleanup when unregistering file extensions.
 declare module "obsidian" {
@@ -42,7 +44,7 @@ const DEFAULT_SETTINGS: NushellSettings = {
 const TABLE_WIDTH = 9999;
 
 // Reject values containing characters that could enable shell injection
-const SAFE_SETTING = /^[a-zA-Z0-9%_\-\/., :]*$/;
+const SAFE_SETTING = /^[a-zA-Z0-9%_\-/., :]*$/;
 
 function sanitize(value: string): string {
 	return SAFE_SETTING.test(value) ? value : "";
@@ -153,23 +155,40 @@ function parseAnsiCodes(codes: number[]): string {
 	return styles.join(";");
 }
 
-function escapeHtml(text: string): string {
-	return text
-		.replace(/&/g, "&amp;")
-		.replace(/</g, "&lt;")
-		.replace(/>/g, "&gt;");
-}
+const ESC = String.fromCharCode(0x1b);
 
-function ansiToHtml(raw: string): string {
-	let html = escapeHtml(raw);
+function ansiToDom(raw: string, container: HTMLElement): void {
+	let pos = 0;
+	let currentSpan: HTMLSpanElement | null = null;
+	const SEQ_RE = /^\[(\d+(?:;\d+)*)m/;
 
-	html = html.replace(/\x1b\[0m/g, "</span>");
-	html = html.replace(/\x1b\[(\d+(?:;\d+)*)m/g, (_, seq: string) => {
-		const style = parseAnsiCodes(seq.split(";").map(Number));
-		return style === "" ? "</span>" : `<span style="${style}">`;
-	});
+	while (pos < raw.length) {
+		const escIdx = raw.indexOf(ESC, pos);
 
-	return html;
+		if (escIdx === -1) {
+			(currentSpan || container).appendText(raw.substring(pos));
+			break;
+		}
+
+		if (escIdx > pos) {
+			(currentSpan || container).appendText(raw.substring(pos, escIdx));
+		}
+
+		const match = raw.substring(escIdx + 1).match(SEQ_RE);
+		if (match) {
+			const codes = match[1].split(";").map(Number);
+			const style = parseAnsiCodes(codes);
+			if (style === "") {
+				currentSpan = null;
+			} else {
+				currentSpan = container.createEl("span");
+				currentSpan.setAttribute("style", style);
+			}
+			pos = escIdx + 1 + match[0].length;
+		} else {
+			pos = escIdx + 1;
+		}
+	}
 }
 
 // ---------------------------------------------------------------------------
@@ -234,27 +253,44 @@ function runNu(
 	});
 }
 
-function renderFallback(data: string): string {
-	return `<span class="nushell-unavailable">Nushell is not installed \u2014 showing raw content</span>\n${escapeHtml(data)}`;
+function renderFallback(data: string, container: HTMLElement): void {
+	container.createEl("span", {
+		text: "Nushell is not installed \u2014 showing raw content",
+		cls: "nushell-unavailable",
+	});
+	container.appendText("\n" + data);
 }
 
-async function renderNuon(data: string, settings: NushellSettings): Promise<string> {
-	if (!getNuStatus().available) return renderFallback(data);
+async function renderNuon(
+	data: string,
+	settings: NushellSettings,
+	container: HTMLElement,
+): Promise<void> {
+	if (!getNuStatus().available) {
+		renderFallback(data, container);
+		return;
+	}
 	const preamble = buildPreamble(settings);
 	const raw = await runNu(
 		`${preamble}$env._NU_INPUT | from nuon | table -e -w ${TABLE_WIDTH}`,
 		{ _NU_INPUT: data.trim() },
 	);
-	return ansiToHtml(raw);
+	ansiToDom(raw, container);
 }
 
-async function renderNuHighlight(data: string): Promise<string> {
-	if (!getNuStatus().available) return renderFallback(data);
+async function renderNuHighlight(
+	data: string,
+	container: HTMLElement,
+): Promise<void> {
+	if (!getNuStatus().available) {
+		renderFallback(data, container);
+		return;
+	}
 	const raw = await runNu(
 		"$env._NU_INPUT | nu-highlight",
 		{ _NU_INPUT: data },
 	);
-	return ansiToHtml(raw);
+	ansiToDom(raw, container);
 }
 
 // ---------------------------------------------------------------------------
@@ -277,7 +313,7 @@ class NuonFileView extends TextFileView {
 
 	setViewData(data: string): void {
 		this.data = data;
-		this.render();
+		void this.render();
 	}
 
 	clear(): void {
@@ -287,12 +323,11 @@ class NuonFileView extends TextFileView {
 	private async render(): Promise<void> {
 		this.contentEl.empty();
 		try {
-			const html = await renderNuon(this.data, this.plugin.settings);
 			const pre = this.contentEl.createEl("pre", { cls: "nushell-output" });
-			pre.innerHTML = html;
+			await renderNuon(this.data, this.plugin.settings, pre);
 		} catch (e) {
 			this.contentEl.createEl("pre", {
-				text: `Error: ${e instanceof Error ? e.message : e}`,
+				text: `Error: ${e instanceof Error ? e.message : String(e)}`,
 				cls: "nushell-error",
 			});
 		}
@@ -305,7 +340,7 @@ class NuFileView extends TextFileView {
 
 	setViewData(data: string): void {
 		this.data = data;
-		this.render();
+		void this.render();
 	}
 
 	clear(): void {
@@ -315,12 +350,11 @@ class NuFileView extends TextFileView {
 	private async render(): Promise<void> {
 		this.contentEl.empty();
 		try {
-			const html = await renderNuHighlight(this.data);
 			const pre = this.contentEl.createEl("pre", { cls: "nushell-output" });
-			pre.innerHTML = html;
+			await renderNuHighlight(this.data, pre);
 		} catch (e) {
 			this.contentEl.createEl("pre", {
-				text: `Error: ${e instanceof Error ? e.message : e}`,
+				text: `Error: ${e instanceof Error ? e.message : String(e)}`,
 				cls: "nushell-error",
 			});
 		}
@@ -450,7 +484,7 @@ class NushellSettingTab extends PluginSettingTab {
 			.setDesc(dateDesc)
 			.addText((text) =>
 				text
-					.setPlaceholder("empty = natural")
+					.setPlaceholder("Empty = natural")
 					.setValue(this.plugin.settings.datetimeFormat)
 					.onChange(async (v) => {
 						this.plugin.settings.datetimeFormat = v;
@@ -501,7 +535,7 @@ class NushellSettingTab extends PluginSettingTab {
 
 		const footer = containerEl.createEl("div", { cls: "nushell-settings-footer" });
 		footer.createEl("p", { text: "Switch file to apply changes.", cls: "nushell-settings-hint" });
-		footer.createEl("p", { text: "Built with Nushell and curiosity.", cls: "nushell-settings-quote" });
+		footer.createEl("p", { text: `Built with Nushell and curiosity. (${BUILD_COMMIT})`, cls: "nushell-settings-quote" });
 		const links = footer.createEl("p");
 		links.createEl("a", {
 			text: "Report an issue",
@@ -559,12 +593,11 @@ export default class NushellPlugin extends Plugin {
 
 		this.registerMarkdownCodeBlockProcessor("nuon", async (source, el) => {
 			try {
-				const html = await renderNuon(source, this.settings);
 				const pre = el.createEl("pre", { cls: "nushell-output" });
-				pre.innerHTML = html;
+				await renderNuon(source, this.settings, pre);
 			} catch (e) {
 				el.createEl("pre", {
-					text: `Error: ${e instanceof Error ? e.message : e}`,
+					text: `Error: ${e instanceof Error ? e.message : String(e)}`,
 					cls: "nushell-error",
 				});
 			}
@@ -572,12 +605,11 @@ export default class NushellPlugin extends Plugin {
 
 		this.registerMarkdownCodeBlockProcessor("nu", async (source, el) => {
 			try {
-				const html = await renderNuHighlight(source);
 				const pre = el.createEl("pre", { cls: "nushell-output" });
-				pre.innerHTML = html;
+				await renderNuHighlight(source, pre);
 			} catch (e) {
 				el.createEl("pre", {
-					text: `Error: ${e instanceof Error ? e.message : e}`,
+					text: `Error: ${e instanceof Error ? e.message : String(e)}`,
 					cls: "nushell-error",
 				});
 			}

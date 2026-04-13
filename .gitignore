@@ -19,6 +19,9 @@ data.json
 *.iml
 .idea/
 
+# Claude Code (local settings are machine-specific)
+.claude/settings.local.json
+
 # Test vault — folder tracked, contents ignored
 Nushell Plugin Playground/*
 !Nushell Plugin Playground/.gitkeep
